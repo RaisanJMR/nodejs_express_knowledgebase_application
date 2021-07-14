@@ -1,6 +1,9 @@
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
+const expressValidator = require('express-validator');
+const flash = require('connect-flash');
+const session = require('express-session');
 
 mongoose.connect('mongodb://localhost/nodekb', {
   useNewUrlParser: true,
@@ -37,6 +40,42 @@ let Article = require('./models/article');
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
+// express session middleware
+app.use(
+  session({
+    secret: 'keyboard cat',
+    resave: true,
+    saveUninitialized: true
+    // cookie: { secure: true },
+  })
+);
+
+// express messages flash
+app.use(require('connect-flash')());
+app.use(function (req, res, next) {
+  res.locals.messages = require('express-messages')(req, res);
+  next();
+});
+
+// express validator middleware
+app.use(
+  expressValidator({
+    errorFormatter: function (param, msg, value) {
+      var namespace = param.split('.'),
+        root = namespace.shift(),
+        formParam = root;
+      while (namespace.length) {
+        formParam += '[' + namespace.shift() + ']';
+      }
+      return {
+        param: formParam,
+        msg: msg,
+        value: value,
+      };
+    },
+  })
+);
+
 // home routes
 app.get('/', (req, res) => {
   Article.find({}, function (err, articles) {
@@ -52,87 +91,9 @@ app.get('/', (req, res) => {
   });
 });
 
-// get single route
-app.get('/article/:id', (req, res) => {
-  Article.findById(req.params.id, (err, article) => {
-    res.render('article', {
-      article: article,
-      title: `knowledgeBase | ${article.title}`,
-    });
-  });
-});
-
-// add route
-app.get('/articles/add', (req, res) => {
-  res.render('add_article', {
-    heading: 'Add Article',
-    title: 'knowledgeBase | ADD ARTICLE',
-  });
-});
-
-// add submit POST route
-app.post('/articles/add', (req, res) => {
-  let article = new Article();
-  article.title = req.body.title;
-  article.author = req.body.author;
-  article.body = req.body.body;
-
-  article.save((err) => {
-    if (err) {
-      console.log(err);
-    } else {
-      res.redirect('/');
-    }
-  });
-});
-
-
-
-// load edit form
-app.get('/article/edit/:id', (req, res) => {
-  Article.findById(req.params.id, (err, article) => {
-    res.render('edit_article', {
-      article: article,
-      heading: 'Edit article',
-      title: `knowledgeBase | edit ${article.title}`,
-    });
-  });
-});
-
-
-
-// edit submit POST route
-app.post('/articles/edit/:id', (req, res) => {
-  let article = {};
-  let query = { _id: req.params.id };
-  article.title = req.body.title;
-  article.author = req.body.author;
-  article.body = req.body.body;
-
-  Article.updateOne(query, article, function (err) {
-    if (err) {
-      console.log(err);
-      return;
-    } else {
-      res.redirect('/');
-    }
-  });
-});
-
-
-
-// DELETE request
-app.delete('/article/:id', (req, res) => {
-  let query = { _id: req.params.id };
-  Article.deleteOne(query, (err) => {
-    if (err) {
-      console.log(err);
-    }
-    res.send('sucess');
-  });
-});
-
-
+// ROUTE files
+const articles = require('./routes/articles');
+app.use('/articles', articles);
 
 // port
 const PORT = 3000;

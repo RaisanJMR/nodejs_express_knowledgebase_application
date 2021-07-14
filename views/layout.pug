@@ -7,7 +7,7 @@ html
     body
         nav.navbar.navbar-expand-lg.navbar-light.bg-light.mb-5
             .container
-                a.navbar-brand.mr-auto(href='/') KnowledgeBase
+                a.navbar-brand(href='/') KnowledgeBase
                 button.navbar-toggler(type='button' data-bs-toggle='collapse' data-bs-target='#navbarSupportedContent' aria-controls='navbarSupportedContent' aria-expanded='false' aria-label='Toggle navigation')
                     span.navbar-toggler-icon
                 #navbarSupportedContent.collapse.navbar-collapse
@@ -15,6 +15,10 @@ html
                         li.nav-item
                             a.nav-link(aria-current='page' href='/articles/add') Add Articles
         .container
+            != messages('message', locals)
+            if errors 
+                each error, i in errors     
+                    div(class="alert alert-danger") #{error.msg}
             block content 
             br
             hr
