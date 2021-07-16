@@ -4,8 +4,12 @@ const mongoose = require('mongoose');
 const expressValidator = require('express-validator');
 const flash = require('connect-flash');
 const session = require('express-session');
+const passport = require('passport');
+const config = require('./config/database');
 
-mongoose.connect('mongodb://localhost/nodekb', {
+
+
+mongoose.connect(config.database, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -76,6 +80,9 @@ app.use(
   })
 );
 
+
+
+
 // home routes
 app.get('/', (req, res) => {
   Article.find({}, function (err, articles) {
@@ -93,7 +100,9 @@ app.get('/', (req, res) => {
 
 // ROUTE files
 const articles = require('./routes/articles');
+const users = require('./routes/users');
 app.use('/articles', articles);
+app.use('/users', users);
 
 // port
 const PORT = 3000;

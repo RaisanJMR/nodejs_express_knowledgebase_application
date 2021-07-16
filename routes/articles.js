@@ -2,7 +2,7 @@ const express = require('express');
 
 const router = express.Router();
 
-// Bring in database models
+// Bring in Article models
 let Article = require('../models/article');
 
 // add route
