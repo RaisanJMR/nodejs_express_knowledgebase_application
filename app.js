@@ -7,8 +7,6 @@ const session = require('express-session');
 const passport = require('passport');
 const config = require('./config/database');
 
-
-
 mongoose.connect(config.database, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -49,7 +47,7 @@ app.use(
   session({
     secret: 'keyboard cat',
     resave: true,
-    saveUninitialized: true
+    saveUninitialized: true,
     // cookie: { secure: true },
   })
 );
@@ -80,8 +78,18 @@ app.use(
   })
 );
 
+// passport config
+require('./config/passport')(passport);
+
+// passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
 
 
+app.get('*',(req,res,next)=>{
+  res.locals.user = req.user || null;
+  next();
+})
 
 // home routes
 app.get('/', (req, res) => {
