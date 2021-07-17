@@ -18,4 +18,4 @@ to start server
 
 ui of application
 
-![imageinfo](scrnsht.png)
+![imageinfo](./scrnsht.png)
